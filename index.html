@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Diagnostic Rendered Evidence for practical 3D asset curation beyond beauty renders.">
+  <title>Is This 3D Asset Usable?</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <section class="publication-hero" id="top">
+      <div class="container">
+        <h1>Is This 3D Asset Usable?<br><span>Beyond the Beauty Render for Asset Curation</span></h1>
+        <p class="venue"><strong>Accepted Poster · 2026</strong></p>
+        <p class="publication-authors">
+          <a href="https://openreview.net/profile?id=~Rushikesh_Zawar1">Rushikesh Zawar</a>,
+          <a href="https://openreview.net/profile?id=~Vladimir_Kim1">Vladimir Kim</a>
+        </p>
+
+        <div class="publication-links" aria-label="Paper resources">
+          <a class="pill-button" href="assets/paper.pdf">
+            <span class="button-icon" aria-hidden="true">▤</span>
+            <span>Paper</span>
+          </a>
+          <a class="pill-button" href="https://github.com/RBZ-99/is-this-3d-asset-usable">
+            <span class="button-icon" aria-hidden="true">⌘</span>
+            <span>Code</span>
+          </a>
+          <a class="pill-button" href="#dataset">
+            <span class="button-icon" aria-hidden="true">◫</span>
+            <span>Data</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="teaser">
+      <div class="container">
+        <figure>
+          <img src="assets/diagnostic-evidence.png" alt="Aligned beauty, wireframe, and UV seam plus wireframe views of the same 3D asset">
+          <figcaption>
+            <strong>Diagnostic Rendered Evidence.</strong> The beauty views look plausible, but aligned
+            wireframe and UV-seam evidence reveal disconnected planar fragments that make the asset
+            difficult to reuse.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container narrow centered">
+        <h2>Abstract</h2>
+        <div class="prose justified">
+          <p>
+            Large 3D repositories make it easy to collect assets, but difficult to determine whether
+            they can be reused reliably across scene assembly, editing, rendering, game production,
+            and training-data construction. An asset can look plausible in RGB while hiding
+            disconnected geometry, problematic UV organization, or materials that fail to resolve
+            correctly after import.
+          </p>
+          <p>
+            We introduce <strong>Diagnostic Rendered Evidence (DRE)</strong>: aligned beauty,
+            wireframe, and UV-seam-plus-wireframe views scored by pass-specific frozen ViT
+            classifiers and combined through late fusion. On 1,234 human-labeled TexVerse assets,
+            nested grouped evaluation achieves 86.36% balanced accuracy and 88.32% bad-asset recall.
+            DRE uses only an imported asset and renderer-derived evidence at inference.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft-section">
+      <div class="container">
+        <h2 class="centered">Motivation</h2>
+        <div class="prose justified">
+          <p>
+            Repository assets are increasingly reused as structured 3D objects rather than static
+            pictures. A convincing preview does not guarantee that a mesh is connected, that its UV
+            organization is workable, or that its materials will survive import into a new pipeline.
+          </p>
+          <p>
+            The key insight is simple: <em>show the classifier and reviewer the structures they need
+            to judge.</em> Synchronized diagnostic passes expose geometry and UV organization while
+            preserving the same camera poses and surface context as the beauty render.
+          </p>
+        </div>
+
+        <div class="evidence-switcher" aria-label="Diagnostic evidence views">
+          <div class="switcher-tabs" role="tablist">
+            <button class="active" data-evidence="beauty" role="tab" aria-selected="true">Beauty</button>
+            <button data-evidence="wire" role="tab" aria-selected="false">Wireframe</button>
+            <button data-evidence="uv" role="tab" aria-selected="false">UV seams + wire</button>
+          </div>
+          <div class="switcher-frame evidence-beauty" id="evidence-frame">
+            <img src="assets/diagnostic-evidence.png" alt="Selected diagnostic evidence modality">
+          </div>
+          <p class="figure-caption" id="evidence-caption">
+            Appearance evidence captures overall plausibility, textures, and visible render failures.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="centered">Method</h2>
+        <div class="prose justified">
+          <p>
+            For every imported asset, DRE renders four synchronized camera poses for three evidence
+            types. A fixed ImageNet-pretrained ViT-B/16 encodes each view. We aggregate each pass with
+            feature-wise means and standard deviations, fit one balanced classifier per evidence type,
+            and combine their probabilities through late fusion.
+          </p>
+        </div>
+
+        <div class="pipeline" aria-label="Diagnostic Rendered Evidence pipeline">
+          <article>
+            <span>1</span>
+            <h3>Import asset</h3>
+            <p>Resolve geometry and material inputs with explicit provenance.</p>
+          </article>
+          <div class="pipeline-arrow" aria-hidden="true">→</div>
+          <article>
+            <span>2</span>
+            <h3>Render evidence</h3>
+            <p>Beauty, wireframe, and UV-seam-plus-wireframe at four poses.</p>
+          </article>
+          <div class="pipeline-arrow" aria-hidden="true">→</div>
+          <article>
+            <span>3</span>
+            <h3>Score passes</h3>
+            <p>Pass-specific frozen ViT features and balanced classifiers.</p>
+          </article>
+          <div class="pipeline-arrow" aria-hidden="true">→</div>
+          <article>
+            <span>4</span>
+            <h3>Late fusion</h3>
+            <p>Combine complementary evidence into a final keep/reject decision.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section soft-section" id="results">
+      <div class="container">
+        <h2 class="centered">Results</h2>
+        <div class="prose justified">
+          <p>
+            Representation-controlled ablations keep labels, grouped folds, the ViT representation,
+            classifier family, fusion method, and threshold-selection protocol fixed. Changing only
+            the evidence produces large gains over beauty views alone.
+          </p>
+        </div>
+
+        <div class="headline-metrics">
+          <article><strong>1,234</strong><span>expert-labeled assets</span></article>
+          <article><strong>86.36%</strong><span>balanced accuracy</span></article>
+          <article><strong>88.32%</strong><span>bad-asset recall</span></article>
+          <article><strong>88.87%</strong><span>external reference BA</span></article>
+        </div>
+
+        <div class="results-grid">
+          <article class="result-panel">
+            <h3>Representation-controlled ablation</h3>
+            <div class="bar-row">
+              <span>Beauty</span><div><i style="--value:71.26%"></i></div><b>71.26</b>
+            </div>
+            <div class="bar-row">
+              <span>Wireframe</span><div><i style="--value:80.35%"></i></div><b>80.35</b>
+            </div>
+            <div class="bar-row">
+              <span>UV seams + wire</span><div><i style="--value:84.97%"></i></div><b>84.97</b>
+            </div>
+            <div class="bar-row selected">
+              <span>Selected DRE fusion</span><div><i style="--value:86.36%"></i></div><b>86.36</b>
+            </div>
+            <p class="panel-note">Balanced accuracy (%) on grouped outer-fold predictions.</p>
+          </article>
+
+          <article class="result-panel comparison-panel">
+            <h3>Cross-source reference set</h3>
+            <div class="comparison-row"><span>DRE</span><strong>88.87%</strong></div>
+            <div class="comparison-row muted"><span>Objaverse++</span><strong>46.99%</strong></div>
+            <p>
+              On a separate balanced set of 764 strict-PBR reference assets and rejected assets,
+              DRE retains 80.37% of positive references and recalls 97.38% of negative references.
+            </p>
+            <p class="panel-note">
+              Reference-label accuracy is not a substitute for independently adjudicated usability labels.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2 class="centered">What Beauty Renders Miss</h2>
+        <div class="prose justified">
+          <p>
+            The examples below illustrate complementary failure modes. DRE does not convert seam count,
+            mesh density, or any individual pass into a universal rule; it makes the relevant evidence
+            inspectable in the context of the asset.
+          </p>
+        </div>
+        <figure class="wide-figure">
+          <img src="assets/failure-cases.png" alt="Three asset failure cases exposed by diagnostic rendered evidence">
+          <figcaption>
+            <strong>(A)</strong> incomplete scan-like fragment;
+            <strong>(B)</strong> unusually broad UV-seam coverage;
+            <strong>(C)</strong> plausible appearance with irregular geometry exposed by wireframe views.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section soft-section" id="dataset">
+      <div class="container">
+        <h2 class="centered">Dataset and Reproducibility</h2>
+        <div class="prose justified">
+          <p>
+            The camera-ready release will include stable asset identifiers, final labels, annotation
+            guidelines, grouped evaluation folds, analytical measurements, predictions, and evaluation
+            code. The canonical annotation table contains 1,234 final expert decisions: 866 good and
+            368 bad.
+          </p>
+          <p>
+            We will also publish complete model-prediction tables for 647,540 TexVerse assets and
+            701,144 Objaverse assets. These larger tables contain model-generated labels rather than
+            additional human annotations.
+          </p>
+          <p>
+            The 764-asset test set will be released first. We will update this page with the training
+            dataset soon.
+          </p>
+        </div>
+        <div class="dataset-actions">
+          <span class="pill-button disabled" aria-disabled="true">Test set · coming soon</span>
+          <span class="pill-button disabled" aria-disabled="true">Training dataset · coming soon</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="citation">
+      <div class="container">
+        <h2>Citation</h2>
+        <pre><code id="bibtex">@inproceedings{dre2026assetusable,
+  title     = {Is This 3D Asset Usable? Beyond the Beauty Render for Asset Curation},
+  author    = {Zawar, Rushikesh and Kim, Vladimir},
+  booktitle = {Workshop Proceedings},
+  year      = {2026}
+}</code></pre>
+        <button class="copy-button" id="copy-bibtex" type="button">Copy BibTeX</button>
+        <p class="citation-note">Replace the venue field with the final camera-ready venue metadata.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container centered">
+      <p>Project page for Diagnostic Rendered Evidence.</p>
+      <p><a href="#top">Back to top</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
